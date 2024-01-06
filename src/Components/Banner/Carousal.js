@@ -3,7 +3,8 @@ import { styled } from "@mui/system";
 import AliceCarousel from "react-alice-carousel";
 import { CryptoState } from "../../CryptoContext";
 import { Link } from "react-router-dom";
-
+import { TrendingCoins } from "../../config/api";
+import axios from "axios";
 function numberWithCommas(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
@@ -30,42 +31,51 @@ const Carousal = () => {
     
   const [trending, setTrending] = useState([]);
   const { currency, symbol } = CryptoState();
-  const axios = require("axios");
-  const fetchTrendingCoins = async () => {
-    // fetch(
-    //   `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&order=gecko_desc&per_page=10&page=1&sparkline=false&price_change_percentage=24h`
-    // )
+  // const axios = require("axios");
+  // const fetchTrendingCoins = async () => {
+  //   // fetch(
+  //   //   `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&order=gecko_desc&per_page=10&page=1&sparkline=false&price_change_percentage=24h`
+  //   // )
 
-    try {
-      const response = await fetch(
-        `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&order=gecko_desc&per_page=10&page=1&sparkline=false&price_change_percentage=24h`
-      );
-      if (!response.ok) {
-        // If the API responds meaningful error message,
-        // then you can get it by calling response.statusText
-        console.log("Sorry something went wrong");
-      }
-      const data = await response.json();
-      setTrending(data);
-    } catch (error) {
-      // It is always recommended to define the error messages
-      // in the client side rather than simply relying on the server messages,
-      // since server messages might not make sense to end user most of the time.
-      console.log(error.message);
-    }
-  };
+  //   try {
+  //     const response = await fetch(
+  //       `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&order=gecko_desc&per_page=10&page=1&sparkline=false&price_change_percentage=24h`
+  //     );
+  //     if (!response.ok) {
+  //       // If the API responds meaningful error message,
+  //       // then you can get it by calling response.statusText
+  //       console.log("Sorry something went wrong");
+  //     }
+  //     const data = await response.json();
+  //     setTrending(data);
+  //   } catch (error) {
+  //     // It is always recommended to define the error messages
+  //     // in the client side rather than simply relying on the server messages,
+  //     // since server messages might not make sense to end user most of the time.
+  //     console.log(error.message);
+  //   }
+  // };
   console.log(trending);
 
   useEffect(() => {
-    try {
-      fetchTrendingCoins();
-       // eslint-disable-next-line react-hooks/exhaustive-deps
-    } catch (error) {
-      console.log("error while fetching data : ", error);
-    }
+    // try {
+    //   fetchTrendingCoins();
+    //    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // } catch (error) {
+    //   console.log("error while fetching data : ", error);
+    // }
+
+      fetchTrendingCoins()
    
   }, [currency]);
 
+  const fetchTrendingCoins = async () => {
+    const { data } = await axios.get(TrendingCoins(currency));
+ 
+    setTrending(data);
+  };
+
+  
   const items = trending.map((coin) => {
     let profit = coin?.price_change_percentage_24h >= 0;
 
