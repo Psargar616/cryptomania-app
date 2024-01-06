@@ -2,7 +2,7 @@
 
 
 ## Demo
-- Here is a working live demo: https://crypto-hunter.netlify.app/
+- Here is a working live demo:[ https://crypto-hunter.netlify.app/](https://cryptomania-react.netlify.app/)
 
 ## Built With 
 - React JS
