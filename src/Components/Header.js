@@ -14,7 +14,8 @@ import { useNavigate } from "react-router-dom";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { CryptoState } from "../CryptoContext";
-
+import AuthModal from "./Authentication/AuthModal";
+import UserSidebar from "./Authentication/UserSidebar";
 const darkTheme = createTheme({
   palette: {
     mode: "dark",
@@ -26,7 +27,7 @@ const darkTheme = createTheme({
 
 const Header = () => {
   const navigate = useNavigate();
-  const { Currency, setCurrency } = CryptoState();
+  const { Currency, setCurrency,user } = CryptoState();
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -74,6 +75,9 @@ const Header = () => {
               </Select>
              
             </FormControl>
+
+
+           { user ? <UserSidebar></UserSidebar> : <AuthModal></AuthModal>}
           </Toolbar>
         </Container>
       </AppBar>

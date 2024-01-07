@@ -8,8 +8,9 @@ import { CryptoState } from "../CryptoContext";
 import { SingleCoin } from "../config/api";
 import styled from "@emotion/styled";
 import CoinInfo from "../Components/CoinInfo";
-import { Typography, createTheme } from "@mui/material";
-import {LinearProgress} from "@mui/material";
+import { Button, Typography, createTheme } from "@mui/material";
+import { LinearProgress } from "@mui/material";
+import { collection, addDoc, deleteDoc } from "firebase/firestore";
 
 // import ReactHtmlParser, {
 //   processNodes,
@@ -17,6 +18,8 @@ import {LinearProgress} from "@mui/material";
 //   htmlparser2,
 // } from "react-html-parser";
 import parse from "html-react-parser";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../firebase";
 
 function numberWithCommas(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -26,7 +29,8 @@ const CoinsPage = () => {
   const { id } = useParams();
   const [coin, setCoin] = useState();
 
-  const { currency, symbol } = CryptoState();
+  const { currency, symbol, user, watchlist, setWatchlist, setAlert } =
+    CryptoState();
 
   const fetchCoin = async () => {
     const { data } = await axios.get(SingleCoin(id));
@@ -36,7 +40,7 @@ const CoinsPage = () => {
 
   useEffect(() => {
     fetchCoin();
-     // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const theme = createTheme({
@@ -89,7 +93,76 @@ const CoinsPage = () => {
     },
   });
 
-// until coin is not loaded show linearprogress
+  const addToWatchList = async () => {
+    // const coinRef = doc(db, "watchlist", user.uid);
+
+    try {
+      // await setDoc(coinRef, {
+      //   coins:watchlist ? [...watchlist, coin.id] : [coin.id],
+      // })
+
+      const coinRef = await addDoc(collection(db, "watchlist"), {
+        coins: watchlist ? [...watchlist, coin?.id] : [coin?.id],
+      });
+      console.log("Document written with ID: ", coinRef.id);
+      setAlert({
+        open: true,
+        message: `${coin.name} Added to the Watchlist !`,
+        type: "success",
+      });
+      return true;
+    } catch (error) {
+      setAlert({
+        open: true,
+        message: error.message,
+        type: "error",
+      });
+    }
+  };
+
+  // const removeFromWatchlist = async () => {
+  //   const coinRef = addDoc(db, "watchlist");
+  //   try {
+  //     await addDoc(
+  //       coinRef,
+  //       { coins: watchlist.filter((wish) => wish !== coin?.id) },
+  //       { merge: true }
+  //     );
+
+  //     setAlert({
+  //       open: true,
+  //       message: `${coin.name} Removed from the Watchlist !`,
+  //       type: "success",
+  //     });
+  //   } catch (error) {
+  //     setAlert({
+  //       open: true,
+  //       message: error.message,
+  //       type: "error",
+  //     });
+  //   }
+  // };
+
+  const removeFromWatchlist = async () => {
+    try {
+      await deleteDoc(doc(db, "watchlist", "coin?.id"));
+      // { merge: true }
+      setAlert({
+        open: true,
+        message: `${coin.name} Removed from the Watchlist !`,
+        type: "success",
+      });
+    } catch (error) {
+      setAlert({
+        open: true,
+        message: error.message,
+        type: "error",
+      });
+    }
+  };
+
+  const inWatchlist = watchlist.includes(coin?.id);
+  // until coin is not loaded show linearprogress
   if (!coin) return <LinearProgress style={{ backgroundColor: "gold" }} />;
 
   return (
@@ -201,6 +274,23 @@ const CoinsPage = () => {
               M
             </Typography>
           </span>
+          
+
+          {user && (
+            <Button
+              variant="outlined"
+              style={{
+                width: "100%",
+                height: 40,
+                color: "black",
+                font: "bold",
+                backgroundColor: inWatchlist ? "#ff0000" : "#EEBC1D",
+              }}
+              onClick={inWatchlist ? removeFromWatchlist : addToWatchList}
+            >
+              {inWatchlist ? "Remove to Watchlist" : "Add to Watchlist"}
+            </Button>
+          )}
         </MarketData>
       </SideBar>
       <CoinInfo coin={coin}></CoinInfo>
